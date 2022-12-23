@@ -118,10 +118,10 @@ class Controler:
    plt.ylabel('Sum of squared distance');
    
    # view the first 10 flower entries
-   # print(flowers[:10])
+   print(modelM.getFlowers()[:10])
    
    #print(modelM.getGroupsTab(1))
-   print(modelM.view_cluster(2))
+   #print(modelM.view_cluster(2))
    
    
 controler = Controler()
