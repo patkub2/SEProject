@@ -1,4 +1,5 @@
-from Controler import Controler
+#from Controler import Controler
+from AppGUI import AppGUI
 
-
-controler = Controler()
+appGUI = AppGUI()
+#controler = Controler()

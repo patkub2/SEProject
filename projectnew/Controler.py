@@ -18,34 +18,37 @@ import pandas as pd
 import pickle
 
 from ModelM import ModelM 
-
+ 
 class Controler:
 
 # instance attributes
- def __init__(self):
+ def __init__(self, path):
+    self.modelM = ModelM(path,[],VGG16(),{}) 
+
+ def runAlgorith(self):
+       
    
-   modelM = ModelM(r"D:\programing projects\SEProject\pppp\pic\flower_images\flower_images",[],VGG16(),{})
    
-   #modelM.setPath(r"D:\programing projects\SEProject\pppp\pic\flower_images\flower_images")
+   #self.modelM.setPath(r"D:\programing projects\SEProject\pppp\pic\flower_images\flower_images")
    
    # change the working directory to the path where the images are located
-   os.chdir(modelM.getPath())
+   os.chdir(self.modelM.getPath())
    
    # this list holds all the image filename
    #flowers = []
    
    # creates a ScandirIterator aliased as files
-   with os.scandir(modelM.getPath()) as files:
+   with os.scandir(self.modelM.getPath()) as files:
      # loops through each file in the directory
        for file in files:
            if file.name.endswith('.png'):
              # adds only the image files to the flowers list
-               modelM.flowers.append(file.name)
+               self.modelM.flowers.append(file.name)
                
                
 
    
-   modelM.setModel(Model(inputs = modelM.getModel().inputs, outputs = modelM.getModel().layers[-2].output)) 
+   self.modelM.setModel(Model(inputs = self.modelM.getModel().inputs, outputs = self.modelM.getModel().layers[-2].output)) 
    
   
       
@@ -53,27 +56,27 @@ class Controler:
    p = r"D:\programing projects\SEProject\pppp\picend"
    
    # lop through each image in the dataset
-   for flower in modelM.getFlowers():
+   for flower in self.modelM.getFlowers():
        # try to extract the features and update the dictionary
        try:
            
-           modelM.setFeat(modelM.extract_features(flower,modelM.getModel()))
-           modelM.setData(flower,modelM.getFeat())
+           self.modelM.setFeat(self.modelM.extract_features(flower,self.modelM.getModel()))
+           self.modelM.setData(flower,self.modelM.getFeat())
            #data[flower] = feat
        # if something fails, save the extracted features as a pickle file (optional)
        except:
            with open(p,'wb') as file:
-               pickle.dump(modelM.getData(),file)
+               pickle.dump(self.modelM.getData(),file)
              
    
    # get a list of the filenames
-   modelM.setFilenames(np.array(list(modelM.getData().keys())))
+   self.modelM.setFilenames(np.array(list(self.modelM.getData().keys())))
    
    # get a list of just the features
-   modelM.setFeat(np.array(list(modelM.getData().values())))
+   self.modelM.setFeat(np.array(list(self.modelM.getData().values())))
    
    # reshape so that there are 210 samples of 4096 vectors
-   modelM.setFeat(modelM.getFeat().reshape(-1,4096))
+   self.modelM.setFeat(self.modelM.getFeat().reshape(-1,4096))
    
    
    # get the unique labels (from the flower_labels.csv)
@@ -83,20 +86,20 @@ class Controler:
    
    # reduce the amount of dimensions in the feature vector
    pca = PCA(n_components=100, random_state=22)
-   pca.fit(modelM.getFeat())
-   x = pca.transform(modelM.getFeat())
+   pca.fit(self.modelM.getFeat())
+   x = pca.transform(self.modelM.getFeat())
    
    # cluster feature vectors
    kmeans = KMeans(n_clusters=len(unique_labels), random_state=22,n_init="auto")
    kmeans.fit(x)
    
    # holds the cluster id and the images { id: [images] }
-   for file, cluster in zip(modelM.getFilenames(),kmeans.labels_):
-       if cluster not in modelM.getGroups().keys():
-           modelM.setGroups(cluster,[])
-           modelM.getGroupsTab(cluster).append(file)
+   for file, cluster in zip(self.modelM.getFilenames(),kmeans.labels_):
+       if cluster not in self.modelM.getGroups().keys():
+           self.modelM.setGroups(cluster,[])
+           self.modelM.getGroupsTab(cluster).append(file)
        else:
-           modelM.getGroupsTab(cluster).append(file)
+           self.modelM.getGroupsTab(cluster).append(file)
    
    
            
@@ -117,13 +120,29 @@ class Controler:
    plt.xlabel(r'Number of clusters *k*')
    plt.ylabel('Sum of squared distance');
    
+   print(list_k)
+   print(sse)
+   print(k)
+   print(km)
+   print(cluster)
+   print(file)
+   print(list(self.modelM.getGroups().keys()).count())
+   print(list(self.modelM.getGroups().keys()))
    # view the first 10 flower entries
-   print(modelM.getFlowers()[:10])
+   #print(self.modelM.getFlowers()[:10])
+   #return self.modelM.getFlowers()
    
-   #print(modelM.getGroupsTab(1))
-   #print(modelM.view_cluster(2))
-   
-   
-controler = Controler()
+   #print(self.modelM.getGroupsTab(1))
+   #print(self.modelM.getGroups())
+   #print(self.modelM.view_cluster(2))
+
+ def returnCluster(self, number):
+    return self.modelM.view_cluster(number)
+
+ def returnAllClusters(self):
+    return self.modelM.getGroups()
+    
+ 
+#controler = Controler()
    # instantiate the objectdddddddddddddddddddddddddddddddddddddddddd
    
